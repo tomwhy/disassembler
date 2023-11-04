@@ -56,6 +56,27 @@ cleanup:
 	return res;
 }
 
+static int is_legacy_prefix(uint8_t byte)
+{
+	return byte == 0x66 || byte == 0xF2|| byte == 0xF3;
+}
+
+static error_t parse_legacy_prefix(const uint8_t **bytes, struct opcode *opcode)
+{
+	const uint8_t *prefix = *bytes;
+
+	if(is_legacy_prefix(*prefix)) {
+		opcode->flags |= F_LEGACY_PREFIX;
+		opcode->legacy_prefix = *prefix;
+		*bytes = prefix + 1;
+	} else if(is_legacy_prefix(*(prefix - 1))) {
+		opcode->flags |= F_MAYBE_LEGACY_PREFIX;
+		opcode->legacy_prefix = *(prefix - 1);
+	}
+
+	return SUCCESS;
+}
+
 static error_t parse_rex_prefix(const uint8_t **bytes, struct opcode *opcode)
 {
 	uint8_t prefix = **bytes;
@@ -77,10 +98,11 @@ error_t parse_opcode(const uint8_t *bytes, struct opcode *opcode)
 	res = parse_opcode_prefixes(&bytes, opcode);
 	VERIFY_SUCCESS();
 
-	res = parse_rex_prefix(&bytes, opcode);
+	res = parse_legacy_prefix(&bytes, opcode);
 	VERIFY_SUCCESS();
 
-	
+	res = parse_rex_prefix(&bytes, opcode);
+	VERIFY_SUCCESS();
 
 	opcode->opcode_len = bytes - opcode_start;
 

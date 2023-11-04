@@ -21,7 +21,9 @@ typedef enum {
 } prefix_t;
 
 typedef enum {
-	F_REX = (1 << 0)
+	F_REX =                 (1 << 0),
+	F_LEGACY_PREFIX =       (1 << 1),
+	F_MAYBE_LEGACY_PREFIX = (1 << 2),
 } opcode_flag_t;
 
 struct rex {
@@ -36,6 +38,7 @@ struct opcode {
 	opcode_flag_t flags;
 
 	prefix_t prefixes;
+	uint8_t legacy_prefix;
 	struct rex rex;
 };
 
