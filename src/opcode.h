@@ -20,10 +20,23 @@ typedef enum {
 	ADDRESS_SIZE_OVERRIDE = (1 << 12),
 } prefix_t;
 
+typedef enum {
+	F_REX = (1 << 0)
+} opcode_flag_t;
+
+struct rex {
+	uint8_t b: 1;
+	uint8_t x: 1;
+	uint8_t r: 1;
+	uint8_t w: 1;
+};
+
 struct opcode {
 	size_t opcode_len;
+	opcode_flag_t flags;
 
 	prefix_t prefixes;
+	struct rex rex;
 };
 
 error_t parse_opcode(const uint8_t *bytes, struct opcode *opcode);

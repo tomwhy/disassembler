@@ -7,6 +7,9 @@
 #define PREFIX_GROUP3 (OPERAND_SIZE_OVERRIDE)
 #define PREFIX_GROUP4 (ADDRESS_SIZE_OVERRIDE)
 
+#define REX_PREFIX_MASK 0xF0
+#define REX_PREFIX 0x40
+
 #define PREFIX_CASE(_byte, _prefix, _group)							\
 case _byte:															\
 	if(opcode->prefixes & PREFIX_GROUP##_group) {					\
@@ -53,6 +56,18 @@ cleanup:
 	return res;
 }
 
+static error_t parse_rex_prefix(const uint8_t **bytes, struct opcode *opcode)
+{
+	uint8_t prefix = **bytes;
+
+	if((prefix & REX_PREFIX_MASK) == REX_PREFIX) {
+		opcode->rex = *(const struct rex *)(*bytes);
+		opcode->flags |= F_REX;
+	}
+
+	return SUCCESS;
+}
+
 error_t parse_opcode(const uint8_t *bytes, struct opcode *opcode)
 {
 	error_t res = SUCCESS;
@@ -62,6 +77,10 @@ error_t parse_opcode(const uint8_t *bytes, struct opcode *opcode)
 	res = parse_opcode_prefixes(&bytes, opcode);
 	VERIFY_SUCCESS();
 
+	res = parse_rex_prefix(&bytes, opcode);
+	VERIFY_SUCCESS();
+
+	
 
 	opcode->opcode_len = bytes - opcode_start;
 
