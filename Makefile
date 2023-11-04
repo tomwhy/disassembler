@@ -5,14 +5,15 @@ MAKEFLAGS+=--silent
 
 ifdef SPARSE
 	CC:=cgcc
-	CFLAGS+=-Wsparse-all -Wsparse-error
+	CFLAGS+=-Wsparse-all -Wno-unknown-attribute -Wsparse-error
 endif
 
 OUT=output
 BIN=dis
 
 SRC_DIR=src
-SRCS=$(SRC_DIR)/main.c
+SRCS=$(SRC_DIR)/main.c \
+     $(SRC_DIR)/opcode.c
 
 BIN_DIR=$(OUT)/bin
 OBJS_DIR=$(OUT)/obj
